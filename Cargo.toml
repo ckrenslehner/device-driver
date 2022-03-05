@@ -1,7 +1,7 @@
 [package]
 name = "device-driver"
-version = "0.3.1"
-authors = ["Dion Dokter <diondokter@gmail.com>"]
+version = "0.4.0"
+authors = ["Dion Dokter <diondokter@gmail.com>", "Emil Fresk <emil.fresk@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/diondokter/device-driver"
@@ -9,12 +9,42 @@ repository = "https://github.com/diondokter/device-driver"
 readme = "README.md"
 keywords = ["no_std", "device", "driver", "toolkit"]
 categories = ["embedded", "hardware-support", "no-std"]
-description = "A toolkit to write better device drivers, faster"
+description = "A toolkit to write better device drivers, faster and more efficient"
+
+# [dependencies]
+# bitvec = { version = "0.20.1", default-features = false }
+#
+# [dev-dependencies]
+# embedded-hal = "0.2.5"
+# embedded-hal-mock = "0.7.2"
+# num_enum = { version = "0.5.1", default-features = false }
+
+[lib]
+proc-macro = true
 
 [dependencies]
-bitvec = { version = "0.20.1", default-features = false }
+proc-macro2 = "1"
+quote = "1"
+proc-macro-error = "1"
+
+[dependencies.syn]
+features = ["extra-traits", "full"]
+version = "1"
 
 [dev-dependencies]
-embedded-hal = "0.2.5"
-embedded-hal-mock = "0.7.2"
-num_enum = { version = "0.5.1", default-features = false }
+trybuild = "1"
+
+# do not optimize proc-macro deps or build scripts
+[profile.dev.build-override]
+codegen-units = 16
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+[profile.release.build-override]
+codegen-units = 16
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false

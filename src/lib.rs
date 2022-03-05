@@ -1,19 +1,25 @@
-//! Crate providing some tools to create better device drivers more easily
-//!
-//! The best source to see how it works is the examples folder.
+use proc_macro::TokenStream;
+use proc_macro_error::{abort, proc_macro_error};
 
-#![cfg_attr(not(test), no_std)]
-#![forbid(missing_docs)]
+mod analysis;
+mod ast;
+mod codegen;
 
-pub use bit::Bit;
-pub use bitvec;
+#[proc_macro_attribute]
+#[proc_macro_error]
+pub fn device_driver(attr: TokenStream, item: TokenStream) -> TokenStream {
+    println!("attr: \"{}\"", attr.to_string());
+    println!("item: \"{}\"", item.to_string());
 
-// #[macro_use]
-// pub mod hl;
-/// The module with tools for creating the low-level parts of the device driver
-#[macro_use]
-pub mod ll;
+    let ast = match ast::parse(attr, item) {
+        Ok(ast) => ast,
+        Err(err) => todo!("parse error {:#?}", err),
+    };
 
-pub mod utils;
+    let analysis = match analysis::analyze(&ast) {
+        Ok(analysis) => analysis,
+        Err(err) => todo!("analysis error {:#?}", err),
+    };
 
-mod bit;
+    codegen::generate(&ast, &analysis)
+}
