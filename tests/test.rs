@@ -8,6 +8,13 @@ mod sr1000 {
         Set = 1,
     }
 
+    // Default infallible
+    #[field(bits = 1)] // Checked at compile time (will result in a mem::transmute)
+    pub enum Bit2 {
+        Clear = 0,
+        Set = 1,
+    }
+
     /// The mode of the pin. 2 bits.
     #[field(infallible, bits = 2)] // Checked at compile time (will result in a mem::transmute)
     pub enum SleepMode {
@@ -24,10 +31,12 @@ mod sr1000 {
         AutoRx = 0b10,
     }
 
+    pub struct RandomUserStruct {}
+
     /// The global register set
-    #[registers(maybe_some_settings)]
+    #[registers(has_sub_address)]
     mod registers {
-        #[register(rw, address = 0x0, size = 1)]
+        #[register(rw, address = 0x0, sub_address = 0x12, size = 1)]
         struct Status {
             /// Docs, single bit
             #[at(7)]
@@ -41,10 +50,19 @@ mod sr1000 {
             #[at(3..5)]
             txmode: TxMode,
         }
+
+        #[register(wo, address = 0x1, sub_address = 0x0, variable_size)]
+        struct TxBuf {
+            #[buffer]
+            buf: &[u8],
+        }
     }
 }
 
 #[test]
 fn test() {
     println!("testing testing");
+
+    // let driver = todo!();
+    // driver.txbuf().write(&[1, 2, 3]);
 }

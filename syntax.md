@@ -1,8 +1,8 @@
 ```rust
 #[device_driver]
-mod SR1000 {
+mod sr1000 {
     /// The mode of the pin. 2 bits.
-    #[generate(infallible, bits = 2)] // Checked at compile time (will result in a mem::transmute)
+    #[field(infallible, bits = 2)] // Checked at compile time (will result in a mem::transmute)
     pub enum SleepMode {
         IdleSleep = 0b00,
         ShallowSleep = 0b01,
@@ -10,7 +10,7 @@ mod SR1000 {
         Shutdown = 0b11,
     }
 
-    #[generate(fallible, bits = 2)] // Checked at run time (will result in a try_into)
+    #[field(fallible, bits = 2)] // Checked at run time (will result in a try_into)
     pub enum TxMode {
         Direct = 0b00,
         Delayed = 0b01,

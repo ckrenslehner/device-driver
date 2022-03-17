@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use proc_macro_error::{abort, proc_macro_error};
+use proc_macro_error::proc_macro_error;
 
 mod analysis;
 mod ast;
@@ -11,7 +11,7 @@ pub fn device_driver(attr: TokenStream, item: TokenStream) -> TokenStream {
     println!("attr: \"{}\"", attr.to_string());
     println!("item: \"{}\"", item.to_string());
 
-    let ast = match ast::parse(attr, item) {
+    let ast = match ast::parse(attr.into(), item.into()) {
         Ok(ast) => ast,
         Err(err) => todo!("parse error {:#?}", err),
     };
