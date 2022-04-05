@@ -1,25 +1,36 @@
-use proc_macro::TokenStream;
-use proc_macro_error::proc_macro_error;
+pub use device_driver_macro::device_driver;
+pub use num_enum::TryFromPrimitive;
 
-mod analysis;
-mod ast;
-mod codegen;
+/// Marker trait used to check for `num_enum::TryFromPrimitive`.
+pub trait FallibleField {}
 
-#[proc_macro_attribute]
-#[proc_macro_error]
-pub fn device_driver(attr: TokenStream, item: TokenStream) -> TokenStream {
-    println!("attr: \"{}\"", attr.to_string());
-    println!("item: \"{}\"", item.to_string());
+impl<T> FallibleField for T where T: TryFromPrimitive {}
 
-    let ast = match ast::parse(attr.into(), item.into()) {
-        Ok(ast) => ast,
-        Err(err) => todo!("parse error {:#?}", err),
-    };
+/// If this trait is implemented, it is guaranteed that running
+/// `mem::transmute(val as u32 & MASK) -> Field` is not UB.
+///
+/// Requirements for implementing this type:
+///
+/// - Only for `enum`s
+/// - The enum must have `#[repr(uXX)]`
+/// - XX >= `NUM_BITS`
+pub unsafe trait InfallibleField {
+    /// Number of bits in the field.
+    const NUM_BITS: u32;
 
-    let analysis = match analysis::analyze(&ast) {
-        Ok(analysis) => analysis,
-        Err(err) => todo!("analysis error {:#?}", err),
-    };
+    /// The mask for the field.
+    const MASK: u32 = (1 << Self::NUM_BITS) - 1;
+}
 
-    codegen::generate(&ast, &analysis)
+/// A bit field.
+#[repr(u8)]
+pub enum Bit {
+    /// The bit is 0.
+    _0,
+    /// The bit is 1.
+    _1,
+}
+
+unsafe impl InfallibleField for Bit {
+    const NUM_BITS: u32 = 1;
 }
